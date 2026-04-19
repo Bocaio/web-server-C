@@ -1,0 +1,8 @@
+# Compiled binaries
+server
+
+# Object files
+*.o
+
+# Debug files
+*.dSYM/
