@@ -25,6 +25,7 @@ int main() {
     printf("Listening the socket failed");
     return 1;
   }
+  printf("Server Listening on port:%d\n", port);
   while (1) {
     socklen_t socketLen = sizeof(serverSockAddr);
     int clientSocketfd =
