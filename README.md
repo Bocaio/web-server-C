@@ -1,4 +1,4 @@
-# C Web Server 🚀
+# C Web Server 
 
 A simple web server built from scratch in C. No frameworks, no fluff—just raw sockets and threads for learning the low-level stuff.
 
