@@ -8,6 +8,19 @@ A simple web server built from scratch in C. No frameworks, no fluff—just raw 
 - **HTTP**: A basic "Hello World" response to see it in action.
 
 ## Quick Start
+
+The easiest way to get started is by using the provided script:
+
+1. **Make the script executable (if needed):**
+   ```bash
+   chmod +x start_program.sh
+   ```
+2. **Run the script:**
+   ```bash
+   ./start_program.sh
+   ```
+
+Alternatively, you can compile and run manually:
 1. **Compile:**
    ```bash
    gcc -o server server.c -pthread
