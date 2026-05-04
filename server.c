@@ -61,6 +61,7 @@ void getMethod(int *socketfd, char *buff, char *method) {
 }
 
 void *handleRequest(void *arg) {
+  // this will return after sending response
   int socketfd = *(int *)arg;
   char buffer[BUFFER_SIZE];
   char method[16];
