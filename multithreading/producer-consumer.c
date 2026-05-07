@@ -19,6 +19,9 @@ typedef struct {
 
   pthread_mutex_t mutex;
 
+  pthread_cond_t push_queue;
+  pthread_cond_t pop_queue;
+
   bool done;
 } bounded_buffer_t;
 
@@ -53,47 +56,40 @@ void bb_finish(bounded_buffer_t *bb) {
 void bb_block_push(bounded_buffer_t *bb, int value) {
   pthread_mutex_lock(&bb->mutex);
 
-  int spins = 0;
+  int loopTimes = 0;
 
   while (bb_full(bb)) {
-    spins++;
+    loopTimes++;
 
-    pthread_mutex_unlock(&bb->mutex);
-
-    // Simulate useless spinning work
-    // usleep(100);
-
-    pthread_mutex_lock(&bb->mutex);
+    // pthread_mutex_unlock(&bb->mutex);
+    // pthread_mutex_lock(&bb->mutex); // Busy-waiting
+    pthread_cond_wait(&bb->pop_queue, &bb->mutex);
   }
 
-  if (spins > 0) {
-    printf("[Producer spun %d times waiting for space]\n", spins);
+  if (loopTimes > 0) {
+    printf("[Producer Looped %d times waiting for space]\n", loopTimes);
   }
 
   bb_push(bb, value);
-
   pthread_mutex_unlock(&bb->mutex);
+  pthread_cond_broadcast(&bb->push_queue);
 }
 
 int bb_block_pop(bounded_buffer_t *bb, bool *done) {
   pthread_mutex_lock(&bb->mutex);
 
-  int spins = 0;
+  int loopTimes = 0;
 
   while (bb_empty(bb) && !bb->done) {
-    spins++;
+    loopTimes++;
 
-    pthread_mutex_unlock(&bb->mutex);
-
-    // Simulate useless spinning work
-    // usleep(100);
-
-    pthread_mutex_lock(&bb->mutex);
+    // pthread_mutex_unlock(&bb->mutex);
+    // pthread_mutex_lock(&bb->mutex); // Busy Waiting
+    pthread_cond_wait(&bb->push_queue, &bb->mutex);
   }
 
-  if (spins > 0) {
-    printf("[Consumer %lu spun %d times waiting for data]\n", pthread_self(),
-           spins);
+  if (loopTimes > 0) {
+    printf("[Consumer looped %d times waiting for data]\n", loopTimes);
   }
 
   int value = 0;
@@ -106,6 +102,7 @@ int bb_block_pop(bounded_buffer_t *bb, bool *done) {
   }
 
   pthread_mutex_unlock(&bb->mutex);
+  pthread_cond_signal(&bb->pop_queue);
 
   return value;
 }
@@ -139,7 +136,7 @@ void *consumer_thread(void *arg) {
       break;
     }
 
-    printf("Consumer %lu consumed %d\n", pthread_self(), number);
+    printf("Consumer consumed %d\n", number);
 
     // Slow consumers to create contention
     usleep(5000);
@@ -160,6 +157,8 @@ int main() {
   buffer.done = false;
 
   pthread_mutex_init(&buffer.mutex, NULL);
+  pthread_cond_init(&buffer.push_queue, NULL);
+  pthread_cond_init(&buffer.pop_queue, NULL);
 
   pthread_t producer;
   pthread_t consumers[NUM_CONSUMERS];
