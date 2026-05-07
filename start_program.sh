@@ -1,2 +1,2 @@
-gcc -o /tmp/server server.c
-exec /tmp/server
+gcc -o "/tmp/$1" "$1"
+exec "/tmp/$1"
