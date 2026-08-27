@@ -35,15 +35,15 @@ int main() {
   printf("Server Listening on port:%d\n", port);
   while (1) {
     socklen_t socketLen = sizeof(serverSockAddr);
-    int clientSocketfd =
+    int newSocketfd =
         accept(serversocketfd, (struct sockaddr *)&serverSockAddr, &socketLen);
-    if (clientSocketfd < 0) {
+    if (newSocketfd < 0) {
       printf("Accepting the socket failed");
       return 1;
     }
-    printf("Client connected with %d\n", clientSocketfd);
+    printf("Client connected with %d\n", newSocketfd);
     pthread_t thread1;
-    pthread_create(&thread1, NULL, handleRequest, &clientSocketfd);
+    pthread_create(&thread1, NULL, handleRequest, &newSocketfd);
     printf("It is running in main thread\n");
   }
   return 1;
